@@ -1,0 +1,64 @@
+ext.versions = [
+        agp                    : '3.4.1',
+        compileSdk             : 28,
+        targetSdk              : 28,
+        minSdk                 : 21,
+
+        coredux                : '1.1.1',
+
+        gradle                 : "5.4.1",
+
+        dagger                 : '2.23.1',
+        kotlin                 : '1.3.31',
+        coroutines             : '1.2.1',
+        rxJava                 : '2.2.9',
+        rxBinding              : '2.2.0',
+
+        viewModel              : '1.1.1',
+
+        support                : '28.0.0',
+        supportConstraintLayout: '1.1.3',
+
+        junit                  : '4.12',
+        kotlinMockito          : '1.5.0',
+        espresso               : '3.0.2',
+        testRunner             : '1.0.2',
+]
+
+ext.gradlePlugins = [
+        androidGradle: "com.android.tools.build:gradle:$versions.agp",
+        kotlin       : "org.jetbrains.kotlin:kotlin-gradle-plugin:$versions.kotlin",
+]
+
+ext.libraries = [
+        dagger           : "com.google.dagger:dagger:$versions.dagger",
+        daggerCompiler   : "com.google.dagger:dagger-compiler:$versions.dagger",
+        kotlinStdlib     : "org.jetbrains.kotlin:kotlin-stdlib:$versions.kotlin",
+        kotlinReflect    : "org.jetbrains.kotlin:kotlin-reflect:$versions.kotlin",
+        coroutinesCore   : "org.jetbrains.kotlinx:kotlinx-coroutines-core:$versions.coroutines",
+        coroutinesAndroid: "org.jetbrains.kotlinx:kotlinx-coroutines-android:$versions.coroutines",
+        timber           : "com.jakewharton.timber:timber:$versions.timber",
+
+        rxJava           : "io.reactivex.rxjava2:rxjava:$versions.rxJava",
+        rxBinding        : "com.jakewharton.rxbinding2:rxbinding-kotlin:$versions.rxBinding",
+
+        coredux          : "com.freeletics.coredux:core:$versions.coredux"
+]
+
+ext.supportLibraries = [
+        annotations     : "com.android.support:support-annotations:$versions.support",
+        appCompat       : "com.android.support:appcompat-v7:$versions.support",
+        recyclerView    : "com.android.support:recyclerview-v7:$versions.support",
+        constraintLayout: "com.android.support.constraint:constraint-layout:$versions.supportConstraintLayout",
+        design          : "com.android.support:design:$versions.support",
+        viewModel       : "android.arch.lifecycle:extensions:$versions.viewModel"
+]
+
+ext.testLibraries = [
+        junit          : "junit:junit:$versions.junit",
+        archCoreTest   : "android.arch.core:core-testing:$versions.viewModel",
+        testRunner     : "com.android.support.test:runner:$versions.testRunner",
+        espressoCore   : "com.android.support.test.espresso:espresso-core:$versions.espresso",
+        espressoContrib: "com.android.support.test.espresso:espresso-contrib:$versions.espresso",
+        testRules      : "com.android.support.test:rules:$versions.testRunner",
+]
