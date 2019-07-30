@@ -9,6 +9,10 @@ kapt {
     }
 }
 
+androidExtensions {
+    experimental = true
+}
+
 android {
     compileSdkVersion versions.compileSdk
     defaultConfig {
@@ -52,15 +56,24 @@ dependencies {
     implementation supportLibraries.recyclerView
     implementation supportLibraries.constraintLayout
     implementation supportLibraries.design
-    implementation supportLibraries.viewModel
+    implementation supportLibraries.lifecycle
+    implementation supportLibraries.fragment
     implementation libraries.rxJava
     implementation libraries.rxBinding
     implementation libraries.coroutinesAndroid
+
+    implementation libraries.roomRuntime
+    implementation libraries.room
+    implementation libraries.roomRx
+    kapt libraries.roomCompiler
 
     implementation libraries.dagger
     kapt libraries.daggerCompiler
 
     implementation libraries.coredux
+    implementation libraries.coreduxLog
+    implementation libraries.mvicore
+    implementation libraries.mvicoreAndroid
 
     testImplementation testLibraries.junit
     testImplementation testLibraries.archCoreTest
@@ -71,4 +84,5 @@ dependencies {
     androidTestImplementation testLibraries.espressoCore
     androidTestImplementation testLibraries.espressoContrib
     androidTestImplementation testLibraries.testRules
+    androidTestImplementation testLibraries.roomTest
 }

@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">MVICurrencyConverter</string>
+    <string name="error_loading_currencies">Ошибка загрузки</string>
+    <string name="error_updating_currencies">Ошибка обновления</string>
 </resources>

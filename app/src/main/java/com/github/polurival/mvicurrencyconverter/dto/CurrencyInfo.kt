@@ -1,19 +1,38 @@
 package com.github.polurival.mvicurrencyconverter.dto
 
+import android.os.Parcelable
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import kotlinx.android.parcel.Parcelize
+
 /**
+ * Parcelable здесь только для MviCore - TimeCapsule
+ *
  * @author Польщиков Юрий on 2019-07-06
  */
+@Parcelize
+@Entity(tableName = "currencyInfo")
 data class CurrencyInfo(
     /**
-     * код валюты
+     * ISO 4217 буквенный код валюты
      */
+    @PrimaryKey
+    @ColumnInfo(name = "charCode")
     val charCode: String,
     /**
-     * номинал
+     * номинал валюты
      */
+    @ColumnInfo(name = "nominal")
     val nominal: Int,
     /**
-     * количество по отношению к 1 рублю ???
+     * имя валюты
      */
-    val rate: Double
-)
+    @ColumnInfo(name = "name")
+    val name: String,
+    /**
+     * количество по отношению к 1 RUB
+     */
+    @ColumnInfo(name = "value")
+    val value: String
+) : Parcelable
