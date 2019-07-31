@@ -30,14 +30,14 @@ class MainActivity : AppCompatActivity(), MainAdapter.ValueChangeListener {
         viewModel<MainViewModel>(SimpleViewModelProviderFactory(viewModelProvider))
     }
 
+    // todo пришлось отказаться для передачи слушателя в конструкторе. Попробовать сделать через сеттер и вернуть ДИ здесь
     //@Inject
     //lateinit var viewBindingFactory: ViewBindingFactory
 
     /*private val viewBinding by lazy {
         viewBindingFactory.create<MainViewBinding>(
             MainActivity::class.java,
-            rootView,
-            this
+            rootView
         )
     }*/
     private lateinit var viewBinding: MainViewBinding

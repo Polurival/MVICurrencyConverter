@@ -1,6 +1,5 @@
 package com.github.polurival.mvicurrencyconverter
 
-import android.annotation.SuppressLint
 import android.text.Editable
 import android.text.InputFilter
 import android.text.InputType
@@ -14,8 +13,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.github.polurival.mvicurrencyconverter.dto.CurrencyInfo
 import io.reactivex.Observable
 
-const val FOCUSED_CURRENCY_VIEW = 1
-const val CURRENCY_VIEW = 2
+private const val FOCUSED_CURRENCY_VIEW = 1
+private const val CURRENCY_VIEW = 2
+private val ANY_NON_DIGIT_REGEXP = Regex("^\\D+\$")
 
 /**
  * @author Польщиков Юрий on 2019-07-25
@@ -60,13 +60,23 @@ class MainAdapter(
         if (holder is CurrencyViewHolder) {
             holder.bind(items.values.toList()[position])
         }
-        if (!holder.itemView.hasOnClickListeners()) {
-            holder.itemView.setOnClickListener {
-                focusedPosition = position
-                // todo перерисовывать только прошлый и текущий фокусные элементы
-                notifyDataSetChanged()
+
+        if (position != focusedPosition) {
+            holder.itemView.isClickable = false;
+            val itemViewGroup = holder.itemView as ViewGroup
+            for (i in 0 until itemViewGroup.childCount) {
+                itemViewGroup.getChildAt(i).isClickable = false
+                itemViewGroup.getChildAt(i).isFocusable = false
             }
         }
+        //todo продумать бизнес-логику - чтобы конвертация была корректна при выборе любой валюты
+        /*holder.itemView.setOnClickListener {
+            val lastFocusedPosition = focusedPosition
+            focusedPosition = position
+
+            notifyItemChanged(lastFocusedPosition)
+            notifyItemChanged(position)
+        }*/
     }
 
     fun getFocusedCurrency(): CurrencyInfo {
@@ -87,13 +97,11 @@ class MainAdapter(
             editTextView.filters = arrayOf(InputFilter.LengthFilter(20))
         }
 
-        @SuppressLint("CheckResult")
         fun bind(item: CurrencyInfo) {
 
             charCodeView.text = item.charCode
             nameView.text = item.name
             editTextView.setText(item.value)
-            editTextView.hint = "100"
 
             valueChangeListener?.onCreateObservable(Observable.create<CurrencyInfo> { emitter ->
                 val textWatcher = object : TextWatcher {
@@ -106,8 +114,15 @@ class MainAdapter(
                     }
 
                     override fun afterTextChanged(editable: Editable?) {
-                        var text = editable.toString()
-                        text = if (text.isBlank()) editTextView.hint.toString() else text
+                        val editableText = editable.toString()
+                        val text: String
+                        if (editableText.isBlank()) {
+                            text = editTextView.hint.toString()
+                        } else if (editableText.contains(ANY_NON_DIGIT_REGEXP)) {
+                            text = "0"
+                        } else {
+                            text = editableText
+                        }
                         emitter.onNext(item.copy(value = text))
                     }
                 }

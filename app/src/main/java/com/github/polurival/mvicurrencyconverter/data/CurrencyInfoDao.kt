@@ -15,6 +15,14 @@ interface CurrencyInfoDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(currenciesInfo: List<CurrencyInfo>)
 
-    @Query("SELECT * from currencyInfo WHERE charCode IN (:selectedCurrencies)")
-    fun getSelectedCurrencies(selectedCurrencies: List<String>) : List<CurrencyInfo>
+    @Query(
+        """SELECT * FROM currencyInfo WHERE charCode IN (:charCode1, :charCode2, :charCode3, :charCode4)
+        ORDER BY charCode=(:charCode1) DESC, charCode=(:charCode2) DESC, charCode=(:charCode3) DESC, charCode=(:charCode4) DESC"""
+    )
+    fun getSelectedCurrencies(
+        charCode1: String,
+        charCode2: String,
+        charCode3: String,
+        charCode4: String
+    ): List<CurrencyInfo>
 }

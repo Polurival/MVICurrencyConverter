@@ -14,7 +14,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
-import kotlin.collections.HashMap
 import kotlin.collections.LinkedHashMap
 
 /**
@@ -48,8 +47,10 @@ private data class ErrorLoadingCurrenciesInfoAction(val error: Throwable) : Acti
         "${ErrorLoadingCurrenciesInfoAction::class.java.simpleName} + error=$error"
 }
 
-private data class SaveCbrfApiResponseAction(val response: CbrfResponse,
-                                             val focusedCurrency: CurrencyInfo?) : Action() {
+private data class SaveCbrfApiResponseAction(
+    val response: CbrfResponse,
+    val focusedCurrency: CurrencyInfo?
+) : Action() {
     override fun toString(): String =
         "${SaveCbrfApiResponseAction::class.java.simpleName} + responseDate=${response.date} " +
                 "+ currenciesCount=${response.currenciesInfo.size} " +
@@ -148,7 +149,6 @@ class MainStateMachine @Inject constructor(
         ) {
             handler { name, output ->
                 logger.logSideEffectEvent { LogEvent.SideEffectEvent.Custom(name, "Start loading currencies info") }
-                //val currentScreenModel = (action as? Action.UpdateCurrenciesInfoAction)?.screenModel
                 loadCurrenciesInfo(action, output, name, logger)
             }
         } else {
@@ -243,8 +243,8 @@ class MainStateMachine @Inject constructor(
                 async {
                     currencyInfoStorage.saveDate(SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(Date()))
                     val currenciesInfo = action.response.currenciesInfo.values.toMutableList()
-                    //currenciesInfo.add(0, CurrencyInfo(""))
-                    currencyInfoStorage.saveCurrencies(action.response.currenciesInfo.values.toList())
+                    currenciesInfo.add(0, getDefaultRubCurrencyInfo())
+                    currencyInfoStorage.saveCurrencies(currenciesInfo)
                 }.await()
             }
             PrepareCurrenciesToShowAction(ConverterScreenModel(focusedCurrencyInfo = action.focusedCurrency))
@@ -308,7 +308,7 @@ class MainStateMachine @Inject constructor(
             val focusedCurrency = if (action is Action.UpdateCurrenciesInfoAction) {
                 action.screenModel.focusedCurrencyInfo
             } else {
-                CurrencyInfo("RUB", 1, "Российский рубль", "100")
+                getDefaultRubCurrencyInfo()
             }
             if (result == null) {
                 // если происходит первоначальная загрузка и в базе данных уже есть актуальные данные
@@ -360,10 +360,10 @@ class MainStateMachine @Inject constructor(
             }
             // это действие вызывается когда произошла первоначальная загрузка или обновление
             is ShowCurrenciesInfoAction -> {
+                val preparedCurrencies = LinkedHashMap<String, CurrencyInfo>()
+
                 if (state is ContainsItems && action.screenModel.focusedCurrencyInfo != null) {
                     // обновление
-                    val preparedCurrencies = LinkedHashMap<String, CurrencyInfo>()
-
                     val focusedCharCode = action.screenModel.focusedCurrencyInfo.charCode
                     val focusedValue = BigDecimal(action.screenModel.focusedCurrencyInfo.value)
                     val focusedNominal = BigDecimal(action.screenModel.focusedCurrencyInfo.nominal)
@@ -383,18 +383,6 @@ class MainStateMachine @Inject constructor(
                             preparedCurrencies[key] = currencyInfo.copy(value = newValue.toPlainString())
                         }
                     }
-
-                    /*for (currencyEntry in state.screenModel.currenciesMap!!) {
-                        val newCurrencyInfo = action.screenModel.currenciesMap!![currencyEntry.key]
-                        if ("RUB" != currencyEntry.key) {
-                            val newValue = BigDecimal(newCurrencyInfo!!.nominal).multiply(focusedValue)
-                                .divide(BigDecimal(newCurrencyInfo.value), 2, RoundingMode.HALF_EVEN)
-                            preparedCurrencies[currencyEntry.key] =
-                                currencyEntry.value.copy(value = newValue.toPlainString())
-                        } else {
-                            preparedCurrencies[currencyEntry.key] = currencyEntry.value
-                        }
-                    }*/
                     State.ShowCurrenciesInfoState(
                         action.screenModel.copy(
                             date = date,
@@ -403,9 +391,6 @@ class MainStateMachine @Inject constructor(
                     )
                 } else {
                     // первоначальная загрузка
-                    val preparedCurrencies = LinkedHashMap<String, CurrencyInfo>()
-                    // todo внедрить менеджер ресурсов
-                    preparedCurrencies["RUB"] = CurrencyInfo("RUB", 1, "Российский рубль", "100")
                     for (currencyEntry in action.screenModel.currenciesMap!!) {
                         val newValue = BigDecimal(currencyEntry.value.nominal * 100)
                             .divide(BigDecimal(currencyEntry.value.value), 2, RoundingMode.HALF_EVEN)
@@ -442,36 +427,6 @@ class MainStateMachine @Inject constructor(
                     }
                 }
                 State.ShowCurrenciesInfoState(state.screenModel.copy(currenciesMap = preparedCurrencies))
-
-
-
-                // todo здесь тоже брать значения из кэша а не из state (currenciesMap)
-                /*val oldChangedValue = state.screenModel
-                    .currenciesMap!![action.changedCurrency.charCode]?.value
-                if (oldChangedValue == action.changedCurrency.value) {
-                    State.ShowCurrenciesInfoState(state.screenModel)
-                } else {
-                    val preparedCurrencies = LinkedHashMap<String, CurrencyInfo>()
-                    for (currencyEntry in state.screenModel.currenciesMap!!) {
-                        if (action.changedCurrency.charCode == currencyEntry.key) {
-                            preparedCurrencies[currencyEntry.key] = action.changedCurrency
-                        } else {
-                            val newValue: BigDecimal
-                            val newChangedValue = action.changedCurrency.value
-                            if (BigDecimal(newChangedValue) == BigDecimal.ZERO) {
-                                newValue = BigDecimal.ZERO
-                            } else {
-                                newValue = BigDecimal(newChangedValue)
-                                    .multiply(BigDecimal(currencyEntry.value.value))
-                                    .divide(BigDecimal(oldChangedValue), 2, RoundingMode.HALF_EVEN)
-                            }
-
-                            preparedCurrencies[currencyEntry.key] =
-                                currencyEntry.value.copy(value = newValue.toPlainString())
-                        }
-                    }
-                    State.ShowCurrenciesInfoState(state.screenModel.copy(currenciesMap = preparedCurrencies))
-                }*/
             }
             is ShowErrorUpdatingCurrenciesInfoAction -> {
                 if (state !is ContainsItems) {
@@ -498,13 +453,13 @@ class MainStateMachine @Inject constructor(
     private fun saveDataInMemoryCache(date: String, currenciesMap: Map<String, CurrencyInfo>) {
         memoryCash["date"] = date
         memoryCash.putAll(currenciesMap)
-
-        //memoryCash["date"] = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(Date())
-        //memoryCash.putAll(response.currenciesInfo.filter { entry -> getChosenCurrencies().contains(entry.key) })
     }
 
     // todo get selected currencies from settings
-    private fun getChosenCurrencies() = listOf("USD", "EUR", "CNY")
+    private fun getChosenCurrencies() = listOf("RUB", "USD", "EUR", "CNY")
+
+    // todo внедрить менеджер ресурсов
+    private fun getDefaultRubCurrencyInfo() = CurrencyInfo("RUB", 1, "Российский рубль", "1")
 
     fun create(coroutineScope: CoroutineScope): Store<State, Action> = coroutineScope
         .createStore(

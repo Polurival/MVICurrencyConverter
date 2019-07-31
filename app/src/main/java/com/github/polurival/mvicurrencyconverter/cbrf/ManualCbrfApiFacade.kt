@@ -2,11 +2,9 @@ package com.github.polurival.mvicurrencyconverter.cbrf
 
 import com.github.polurival.mvicurrencyconverter.dto.CbrfResponse
 import com.github.polurival.mvicurrencyconverter.dto.CurrencyInfo
-import kotlinx.coroutines.Deferred
 import org.w3c.dom.Document
 import java.io.InputStream
 import java.net.URL
-import java.net.UnknownServiceException
 import java.util.*
 import javax.xml.parsers.DocumentBuilderFactory
 
@@ -18,12 +16,7 @@ class ManualCbrfApiFacade : CbrfApi {
     override fun loadCurrenciesInfo(): CbrfResponse {
         val url = URL(API_URL)
         val connection = url.openConnection()
-        var inputStream: InputStream? = null
-        try {
-            inputStream = connection.getInputStream()
-        } catch (e: Throwable) {
-            var x = 0
-        }
+        val inputStream: InputStream = connection.getInputStream()
         val xmlDocument = parseDataToXmlDocument(inputStream)
 
         return convertDocumentToListOfCurrencies(xmlDocument)
@@ -81,6 +74,9 @@ class ManualCbrfApiFacade : CbrfApi {
         val NAME_TAG = "Name"
         val VALUE_TAG = "Value"
 
+        /**
+         * Осталось для MVICore реализации
+         */
         val service = ManualCbrfApiFacade()
     }
 }

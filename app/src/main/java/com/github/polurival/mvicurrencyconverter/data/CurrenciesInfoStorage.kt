@@ -2,16 +2,15 @@ package com.github.polurival.mvicurrencyconverter.data
 
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
-import androidx.room.Room
 import com.github.polurival.mvicurrencyconverter.dto.CurrencyInfo
-import io.reactivex.Completable
-import io.reactivex.Observable
 
 /**
  * @author Польщиков Юрий on 2019-07-24
  */
-class CurrenciesInfoStorage(private val context: Context,
-                            private val database: CurrencyInfoDatabase) {
+class CurrenciesInfoStorage(
+    private val context: Context,
+    private val database: CurrencyInfoDatabase
+) {
 
     fun saveDate(date: String) {
         context.getSharedPreferences(PREF_FILE_NAME, MODE_PRIVATE).edit()
@@ -28,9 +27,15 @@ class CurrenciesInfoStorage(private val context: Context,
     }
 
     fun loadCurrencies(selectedCurrencies: List<String>): List<CurrencyInfo> {
-        return database.currencyInfoDao().getSelectedCurrencies(selectedCurrencies)
+        return database.currencyInfoDao().getSelectedCurrencies(
+            selectedCurrencies[0], selectedCurrencies[1],
+            selectedCurrencies[2], selectedCurrencies[3]
+        )
     }
 
+    /**
+     * Осталось для MVICore реализации
+     */
     companion object {
         val PREF_FILE_NAME = "miniCurrencyConverter"
         val PREF_DATE_KEY = "prefDateKey"
@@ -41,7 +46,8 @@ class CurrenciesInfoStorage(private val context: Context,
         fun getStorage(context: Context): CurrenciesInfoStorage {
             return INSTANCE ?: synchronized(this) {
                 // Create database here
-                val instance = CurrenciesInfoStorage(context.applicationContext, CurrencyInfoDatabase.getDatabase(context))
+                val instance =
+                    CurrenciesInfoStorage(context.applicationContext, CurrencyInfoDatabase.getDatabase(context))
                 INSTANCE = instance
                 instance
             }
