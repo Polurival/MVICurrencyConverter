@@ -1,1 +1,4 @@
-include ':app'
+include ':coreduxapp'
+include ':datalib'
+include ':mvicore-loadcurrenciesfeature'
+include ':mvicoreapp'

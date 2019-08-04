@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">MviCoreApp</string>
+    <string name="default_focused_currency_value">100</string>
+</resources>

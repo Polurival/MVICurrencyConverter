@@ -4,7 +4,10 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/MVICurrencyConverter.iml" filepath="$PROJECT_DIR$/.idea/MVICurrencyConverter.iml" />
       <module fileurl="file://$PROJECT_DIR$/MVICurrencyConverter.iml" filepath="$PROJECT_DIR$/MVICurrencyConverter.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/coreduxapp/coreduxapp.iml" filepath="$PROJECT_DIR$/coreduxapp/coreduxapp.iml" />
+      <module fileurl="file://$PROJECT_DIR$/datalib/datalib.iml" filepath="$PROJECT_DIR$/datalib/datalib.iml" />
+      <module fileurl="file://$PROJECT_DIR$/mvicore-loadcurrenciesfeature/mvicore-loadcurrenciesfeature.iml" filepath="$PROJECT_DIR$/mvicore-loadcurrenciesfeature/mvicore-loadcurrenciesfeature.iml" />
+      <module fileurl="file://$PROJECT_DIR$/mvicoreapp/mvicoreapp.iml" filepath="$PROJECT_DIR$/mvicoreapp/mvicoreapp.iml" />
     </modules>
   </component>
 </project>

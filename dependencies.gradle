@@ -13,6 +13,7 @@ ext.versions = [
         kotlin                 : '1.3.31',
         coroutines             : '1.2.1',
         rxJava                 : '2.2.9',
+        rxAndroid              : '2.1.0',
         rxBinding              : '2.2.0',
 
         roomVersion            : '2.1.0-alpha06',
@@ -44,6 +45,7 @@ ext.libraries = [
         timber           : "com.jakewharton.timber:timber:$versions.timber",
 
         rxJava           : "io.reactivex.rxjava2:rxjava:$versions.rxJava",
+        rxAndroid        : "io.reactivex.rxjava2:rxandroid:$versions.rxAndroid",
         rxBinding        : "com.jakewharton.rxbinding2:rxbinding-kotlin:$versions.rxBinding",
 
         coredux          : "com.freeletics.coredux:core:$versions.coredux",
