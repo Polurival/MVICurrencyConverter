@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.github.polurival.datalib.local.CurrenciesInfoStorage
 import com.github.polurival.datalib.local.CurrencyInfoDatabase
+import com.github.polurival.datalib.local.LocalStorage
 import com.github.polurival.datalib.remote.CbrfApi
 import com.github.polurival.datalib.remote.ManualCbrfApiFacade
 import com.github.polurival.mvicurrencyconverter.ViewBindingFactory
@@ -30,7 +31,7 @@ class ApplicationModule(
 
     @Provides
     @Singleton
-    fun provideCurrenciesInfoStorage(): CurrenciesInfoStorage {
+    fun provideCurrenciesInfoStorage(): LocalStorage {
         val currencyInfoDatabase = Room.databaseBuilder(
             context,
             CurrencyInfoDatabase::class.java,

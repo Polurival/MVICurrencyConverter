@@ -3,7 +3,7 @@ package com.github.polurival.mvicurrencyconverter
 import com.freeletics.coredux.*
 import com.github.polurival.datalib.common.ConverterScreenModel
 import com.github.polurival.datalib.common.CurrencyInfo
-import com.github.polurival.datalib.local.CurrenciesInfoStorage
+import com.github.polurival.datalib.local.LocalStorage
 import com.github.polurival.datalib.remote.CbrfApi
 import com.github.polurival.datalib.remote.CbrfResponse
 import kotlinx.coroutines.*
@@ -91,7 +91,7 @@ private data class HideErrorUpdatingCurrenciesInfoAction(val error: Throwable) :
  */
 class MainStateMachine @Inject constructor(
     private val cbrfApi: CbrfApi,
-    private val currencyInfoStorage: CurrenciesInfoStorage,
+    private val currencyInfoStorage: LocalStorage,
     private val loggers: MutableSet<LogSink>,
     private val memoryCash: LinkedHashMap<String, Any>
 ) {

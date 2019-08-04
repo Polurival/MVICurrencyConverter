@@ -11,9 +11,6 @@ import kotlinx.coroutines.Job
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
-/**
- * @author Польщиков Юрий on 2019-07-07
- */
 class MainViewModel @Inject constructor(
     mainStateMachine: MainStateMachine,
     @AndroidScheduler private val androidScheduler: CoroutineDispatcher

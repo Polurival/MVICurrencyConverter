@@ -69,6 +69,7 @@ dependencies {
     implementation libraries.coreduxLog
 
     implementation project(':datalib')
+    testImplementation project(':mockfactory')
 
     testImplementation testLibraries.junit
     testImplementation testLibraries.archCoreTest
