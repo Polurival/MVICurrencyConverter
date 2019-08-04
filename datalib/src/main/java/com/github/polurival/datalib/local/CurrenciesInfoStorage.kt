@@ -5,6 +5,8 @@ import android.content.Context.MODE_PRIVATE
 import com.github.polurival.datalib.common.CurrencyInfo
 
 /**
+ * todo extract interface
+ *
  * @author Польщиков Юрий on 2019-07-24
  */
 class CurrenciesInfoStorage(

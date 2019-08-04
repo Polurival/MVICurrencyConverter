@@ -17,6 +17,8 @@ import javax.inject.Inject
 import kotlin.collections.LinkedHashMap
 
 /**
+ * Input Actions from UI
+ *
  * @author Польщиков Юрий on 2019-07-06
  */
 sealed class Action {
@@ -37,6 +39,8 @@ sealed class Action {
                 "+ newValue=${changedCurrency.value}"
     }
 }
+
+// region inner actions
 
 private object StartLoadingCurrenciesInfoAction : Action() {
     override fun toString(): String = StartLoadingCurrenciesInfoAction::class.java.simpleName
@@ -79,6 +83,12 @@ private data class HideErrorUpdatingCurrenciesInfoAction(val error: Throwable) :
         "${HideErrorUpdatingCurrenciesInfoAction::class.java.simpleName} + error=$error"
 }
 
+// endregion inner actions
+
+/**
+ * todo Interactor, that will use CbrfApi, CurrenciesInfoStorage and memory cash and contains business logic
+ * Move memory cash and work with it to CurrenciesInfoStorage
+ */
 class MainStateMachine @Inject constructor(
     private val cbrfApi: CbrfApi,
     private val currencyInfoStorage: CurrenciesInfoStorage,
@@ -148,7 +158,7 @@ class MainStateMachine @Inject constructor(
             || action is Action.UpdateCurrenciesInfoAction
         ) {
             handler { name, output ->
-                logger.logSideEffectEvent { LogEvent.SideEffectEvent.Custom(name, "Start loading currencies info") }
+                logger.logCustom(name, "Start loading currencies info")
                 loadCurrenciesInfo(action, output, name, logger)
             }
         } else {
@@ -161,7 +171,7 @@ class MainStateMachine @Inject constructor(
     ) { state, action, logger, handler ->
         if (action is SaveCbrfApiResponseAction) {
             handler { name, output ->
-                logger.logSideEffectEvent { LogEvent.SideEffectEvent.Custom(name, "Start saving Cbrf response") }
+                logger.logCustom(name, "Start saving Cbrf response")
                 saveCbrfResponse(action, output, name, logger)
             }
         } else {
@@ -175,9 +185,7 @@ class MainStateMachine @Inject constructor(
         val currentState = state()
         if (action is PrepareCurrenciesToShowAction) {
             handler { name, output ->
-                logger.logSideEffectEvent {
-                    LogEvent.SideEffectEvent.Custom(name, "Start preparing currencies to show")
-                }
+                logger.logCustom(name, "Start preparing currencies to show")
                 prepareCurrenciesToShow(currentState, action, output, name, logger)
             }
         } else {
@@ -185,6 +193,9 @@ class MainStateMachine @Inject constructor(
         }
     }
 
+    /**
+     * Loads data from Preferences and Room or from memory cash and calculate currencies values for UI
+     */
     private fun CoroutineScope.prepareCurrenciesToShow(
         state: State,
         action: PrepareCurrenciesToShowAction,
@@ -214,7 +225,6 @@ class MainStateMachine @Inject constructor(
                 screenModel = action.screenModel
             }
 
-
             val preparedCurrencies = LinkedHashMap<String, CurrencyInfo>()
             val date: String?
             val focusedCurrencyInfo = screenModel.focusedCurrencyInfo
@@ -239,12 +249,6 @@ class MainStateMachine @Inject constructor(
                         preparedCurrencies[key] = currencyInfo.copy(value = newValue.toPlainString())
                     }
                 }
-                /*State.ShowCurrenciesInfoState(
-                    screenModel.copy(
-                        date = date,
-                        currenciesMap = preparedCurrencies
-                    )
-                )*/
             } else {
                 // первоначальная загрузка
                 date = null
@@ -254,11 +258,7 @@ class MainStateMachine @Inject constructor(
                     preparedCurrencies[currencyEntry.key] =
                         currencyEntry.value.copy(value = newValue.toPlainString())
                 }
-                //State.ShowCurrenciesInfoState(screenModel.copy(currenciesMap = preparedCurrencies))
             }
-
-
-
 
             ShowCurrenciesInfoAction(
                 screenModel.copy(
@@ -266,26 +266,23 @@ class MainStateMachine @Inject constructor(
                     currenciesMap = preparedCurrencies
                 )
             ).run {
-                logger.logSideEffectEvent {
-                    LogEvent.SideEffectEvent.DispatchingToReducer(sideEffectName, this)
-                }
+                logger.logDispatchingToReducer(sideEffectName, this)
                 output.send(this)
             }
         } catch (error: Throwable) {
-            logger.logSideEffectEvent {
-                LogEvent.SideEffectEvent.Custom(sideEffectName, "Error on preparing currencies to show: $error")
-            }
+            logger.logCustom(sideEffectName, "Error on preparing currencies to show: $error")
             ErrorLoadingCurrenciesInfoAction(error)
                 .run {
-                    logger.logSideEffectEvent {
-                        LogEvent.SideEffectEvent.DispatchingToReducer(sideEffectName, this)
-                    }
+                    logger.logDispatchingToReducer(sideEffectName, this)
                     output.send(this)
                 }
             // todo добавить предыдущее состояние, которое скрывает состояние ошибки
         }
     }
 
+    /**
+     * Saves load date in Preferences and currencies info in Room
+     */
     private fun CoroutineScope.saveCbrfResponse(
         action: SaveCbrfApiResponseAction,
         output: SendChannel<Action>,
@@ -303,20 +300,14 @@ class MainStateMachine @Inject constructor(
             }
             PrepareCurrenciesToShowAction(ConverterScreenModel(focusedCurrencyInfo = action.focusedCurrency))
                 .run {
-                    logger.logSideEffectEvent {
-                        LogEvent.SideEffectEvent.DispatchingToReducer(sideEffectName, this)
-                    }
+                    logger.logDispatchingToReducer(sideEffectName, this)
                     output.send(this)
                 }
         } catch (error: Throwable) {
-            logger.logSideEffectEvent {
-                LogEvent.SideEffectEvent.Custom(sideEffectName, "Error on saving Cbrf response info: $error")
-            }
+            logger.logCustom(sideEffectName, "Error on saving Cbrf response info: $error")
             ErrorLoadingCurrenciesInfoAction(error)
                 .run {
-                    logger.logSideEffectEvent {
-                        LogEvent.SideEffectEvent.DispatchingToReducer(sideEffectName, this)
-                    }
+                    logger.logDispatchingToReducer(sideEffectName, this)
                     output.send(this)
                 }
         }
@@ -335,9 +326,7 @@ class MainStateMachine @Inject constructor(
 
         StartLoadingCurrenciesInfoAction
             .run {
-                logger.logSideEffectEvent {
-                    LogEvent.SideEffectEvent.DispatchingToReducer(sideEffectName, this)
-                }
+                logger.logDispatchingToReducer(sideEffectName, this)
                 output.send(this)
             }
 
@@ -369,29 +358,21 @@ class MainStateMachine @Inject constructor(
                 // если происходит первоначальная загрузка и в базе данных уже есть актуальные данные
                 PrepareCurrenciesToShowAction(ConverterScreenModel(focusedCurrencyInfo = focusedCurrency))
                     .run {
-                        logger.logSideEffectEvent {
-                            LogEvent.SideEffectEvent.DispatchingToReducer(sideEffectName, this)
-                        }
+                        logger.logDispatchingToReducer(sideEffectName, this)
                         output.send(this)
                     }
             } else {
                 SaveCbrfApiResponseAction(result, focusedCurrency)
                     .run {
-                        logger.logSideEffectEvent {
-                            LogEvent.SideEffectEvent.DispatchingToReducer(sideEffectName, this)
-                        }
+                        logger.logDispatchingToReducer(sideEffectName, this)
                         output.send(this)
                     }
             }
         } catch (error: Throwable) {
-            logger.logSideEffectEvent {
-                LogEvent.SideEffectEvent.Custom(sideEffectName, "Error on loading currencies info: $error")
-            }
+            logger.logCustom(sideEffectName, "Error on loading currencies info: $error")
             ErrorLoadingCurrenciesInfoAction(error)
                 .run {
-                    logger.logSideEffectEvent {
-                        LogEvent.SideEffectEvent.DispatchingToReducer(sideEffectName, this)
-                    }
+                    logger.logDispatchingToReducer(sideEffectName, this)
                     output.send(this)
                 }
         }
@@ -416,46 +397,6 @@ class MainStateMachine @Inject constructor(
             // это действие вызывается когда произошла первоначальная загрузка или обновление
             is ShowCurrenciesInfoAction -> {
                 State.ShowCurrenciesInfoState(action.screenModel)
-
-                /*val preparedCurrencies = LinkedHashMap<String, CurrencyInfo>()
-
-                if (state is ContainsItems && action.screenModel.focusedCurrencyInfo != null) {
-                    // обновление
-                    val focusedCharCode = action.screenModel.focusedCurrencyInfo.charCode
-                    val focusedValue = BigDecimal(action.screenModel.focusedCurrencyInfo.value)
-                    val focusedNominal = BigDecimal(action.screenModel.focusedCurrencyInfo.nominal)
-
-                    val date: String = memoryCash["date"] as String
-                    for (key in memoryCash.keys) {
-                        if (key == "date") {
-                            continue
-                        }
-                        val currencyInfo = memoryCash[key] as CurrencyInfo
-                        if (key == focusedCharCode) {
-                            preparedCurrencies[key] = action.screenModel.focusedCurrencyInfo
-                        } else {
-                            val newValue = focusedValue.multiply(BigDecimal(currencyInfo.nominal))
-                                .divide(BigDecimal(currencyInfo.value), 2, RoundingMode.HALF_EVEN)
-                                .divide(focusedNominal, 2, RoundingMode.HALF_EVEN)
-                            preparedCurrencies[key] = currencyInfo.copy(value = newValue.toPlainString())
-                        }
-                    }
-                    State.ShowCurrenciesInfoState(
-                        action.screenModel.copy(
-                            date = date,
-                            currenciesMap = preparedCurrencies
-                        )
-                    )
-                } else {
-                    // первоначальная загрузка
-                    for (currencyEntry in action.screenModel.currenciesMap!!) {
-                        val newValue = BigDecimal(currencyEntry.value.nominal * 100)
-                            .divide(BigDecimal(currencyEntry.value.value), 2, RoundingMode.HALF_EVEN)
-                        preparedCurrencies[currencyEntry.key] =
-                            currencyEntry.value.copy(value = newValue.toPlainString())
-                    }
-                    State.ShowCurrenciesInfoState(action.screenModel.copy(currenciesMap = preparedCurrencies))
-                }*/
             }
             // это действие вызывается при редактировании значения пользователем
             is Action.CalculateNewValuesAction -> {
@@ -533,4 +474,16 @@ class MainStateMachine @Inject constructor(
             ),
             reducer = ::reducer
         )
+}
+
+private fun SideEffectLogger.logCustom(sideEffectName: String, error: String) {
+    logSideEffectEvent {
+        LogEvent.SideEffectEvent.Custom(sideEffectName, error)
+    }
+}
+
+private fun SideEffectLogger.logDispatchingToReducer(sideEffectName: String, action: Action) {
+    logSideEffectEvent {
+        LogEvent.SideEffectEvent.DispatchingToReducer(sideEffectName, action)
+    }
 }
