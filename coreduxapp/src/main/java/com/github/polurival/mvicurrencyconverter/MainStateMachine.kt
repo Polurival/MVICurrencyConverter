@@ -51,7 +51,7 @@ private data class ErrorLoadingCurrenciesInfoAction(val error: Throwable) : Acti
         "${ErrorLoadingCurrenciesInfoAction::class.java.simpleName} + error=$error"
 }
 
-private data class SaveCbrfApiResponseAction(
+data class SaveCbrfApiResponseAction(
     val response: CbrfResponse,
     val focusedCurrency: CurrencyInfo?
 ) : Action() {
@@ -61,13 +61,13 @@ private data class SaveCbrfApiResponseAction(
                 "+ focusedCurrency=${focusedCurrency?.charCode}"
 }
 
-private data class PrepareCurrenciesToShowAction(val screenModel: ConverterScreenModel?) : Action() {
+data class PrepareCurrenciesToShowAction(val screenModel: ConverterScreenModel?) : Action() {
     override fun toString(): String = "${PrepareCurrenciesToShowAction::class.java.simpleName} " +
             "+ focusedCurrency=${screenModel?.focusedCurrencyInfo?.charCode} " +
             "+ currenciesCount=${screenModel?.currenciesMap?.size}"
 }
 
-private data class ShowCurrenciesInfoAction(val screenModel: ConverterScreenModel) : Action() {
+data class ShowCurrenciesInfoAction(val screenModel: ConverterScreenModel) : Action() {
     override fun toString(): String = "${ShowCurrenciesInfoAction::class.java.simpleName} " +
             "+ loadDate=${screenModel.date} " +
             "+ currenciesCount=${screenModel.currenciesMap?.size}"
@@ -194,6 +194,8 @@ class MainStateMachine @Inject constructor(
     }
 
     /**
+     * todo упростить как-то код в сайдэффектах, вынести часть в методы и тд.
+     *
      * Loads data from Preferences and Room or from memory cash and calculate currencies values for UI
      */
     private fun CoroutineScope.prepareCurrenciesToShow(
